@@ -17,19 +17,6 @@ typedef enum {
     WALK_INVALID = 5
 } WalkExitCode;
 
-typedef struct FileMatch {
-    char *filename;
-    struct FileMatch *next;
-    struct FileMatch *prev;
-} FileMatch;
-
-WalkExitCode WalkRecursive(char *dname, char *pattern, FileMatch **result);
-
-FileMatch * FileMatchCreate();
-FileMatch * FileMatchAdd(FileMatch * matches, char *name, int length);
-void FileMatchFinish(FileMatch * matches);
-void FileMatchDestroy(FileMatch *match_list);
-void FileMatchRewind(FileMatch **match_list);
-FileMatch * FileMatchIterate(FileMatch **match_list);
+WalkExitCode WalkRecursive(char *dname, char *pattern, ListEntry **result);
 
 #endif /* WALK_H_ */

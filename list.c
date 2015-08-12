@@ -1,18 +1,28 @@
 #include <stdlib.h>
 #include "list.h"
 
-ListEntry* list_create() {
-    return calloc(1, sizeof(ListEntry));
+ListEntry* ListCreate(void *data) {
+    ListEntry *result;
+    result = calloc(1, sizeof(ListEntry));
+    if(result != NULL) {
+        result->data = data;
+    }
+    return result;
 }
 
-ListEntry * list_rewind(ListEntry *target) {
-    while (target->prev != NULL)
+ListEntry * ListRewind(ListEntry *target) {
+    if(target == NULL) {
+        return NULL;
+    }
+    
+    while (target->prev != NULL) {
         target = target->prev;
-
+    }
+    
     return target;
 }
 
-ListEntry * list_delete(ListEntry *target) {
+ListEntry * ListDelete(ListEntry *target) {
     ListEntry * result;
     
     if(target == NULL)
@@ -33,16 +43,17 @@ ListEntry * list_delete(ListEntry *target) {
     return result;
 }
 
-ListEntry * list_add_after(ListEntry *target, void *data) {
-    if(target == NULL)
-        return NULL;
-
+ListEntry * ListAddAfter(ListEntry *target, void *data) {
     ListEntry *new_record = calloc(1, sizeof(ListEntry));
 
     if(new_record == NULL)
         return NULL;
 
     new_record->data = data;
+    
+    if(target == NULL)
+        return new_record;
+    
     new_record->prev = target;
     new_record->next = target->next;
     if(target->next != NULL)
@@ -52,16 +63,17 @@ ListEntry * list_add_after(ListEntry *target, void *data) {
     return new_record;
 }
 
-ListEntry * list_add_before(ListEntry *target, void *data) {
-    if(target == NULL)
-        return NULL;
-
+ListEntry * ListAddBefore(ListEntry *target, void *data) {
     ListEntry *new_record = calloc(1, sizeof(ListEntry));
 
     if(new_record == NULL)
         return NULL;
-
+    
     new_record->data = data;
+    
+    if(target == NULL)
+        return new_record;
+
     new_record->next = target;
     new_record->prev = target->prev;
     if(target->prev != NULL)
@@ -71,13 +83,13 @@ ListEntry * list_add_before(ListEntry *target, void *data) {
     return new_record;
 }
 
-void list_destroy(ListEntry *target) {
+void ListDestroy(ListEntry *target) {
     if(target == NULL)
         return;
 
-    target = list_rewind(target);
+    target = ListRewind(target);
 
     while(target != NULL) {
-        target = list_delete(target);
+        target = ListDelete(target);
     }
 }

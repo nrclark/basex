@@ -4,28 +4,31 @@
 #include "list.h"
 
 void print_list(ListEntry *target) {
-    target = list_rewind(target);
+    target = ListRewind(target);
 
     while(target != NULL) {
         printf("data: %02d, prev: %08X, curr: %08X, next: %08X\n",
-            target->data, target->prev, target, target->next);
+            *((int *)(target->data)), target->prev, target, target->next);
         target = target->next;
     }
 }
 
 int main(void) {
     int x;
+    ListEntry * myList = NULL;
     int *buf;
-    ListEntry * myList;
-    myList = list_create();
     
+    buf = malloc(sizeof(int));
+    *buf = 51;
+
+    myList = ListCreate(buf);
     for(x = 0; x < 4; x++) {
         buf = malloc(sizeof(int));
         *buf = x;
-        myList = list_add_after(myList, buf);
+        myList = ListAddAfter(myList, buf);
     }
    
     print_list(myList);
-    list_destroy(myList);
+    ListDestroy(myList);
     return 0;
 }

@@ -8,12 +8,13 @@
 
 #include "walk.h"
 
-static WalkExitCode recurse(char *target, regex_t *regex, FileMatch *result) {
+static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
     int target_length;
     int dname_length;
     int full_length;
 
     char *dname;
+    char *output;
     char buffer[FILENAME_MAX + 1];
 
     WalkExitCode exit_code;
@@ -65,8 +66,14 @@ static WalkExitCode recurse(char *target, regex_t *regex, FileMatch *result) {
         } else {
             if (S_ISREG(file_stat.st_mode)) {
                 if (regexec(regex, dname, 0, 0, 0) == 0) {
-                    result = FileMatchAdd(result, buffer, full_length);
-                    if(result == NULL) {
+                    output = malloc(full_length + 1);
+                    if(output == NULL) {
+                        return WALK_NOMEM;
+                    }
+                    strncpy(output, buffer, full_length);
+                    output[full_length] = 0x00;
+                    *result = ListAddAfter(*result, output);
+                    if(*result == NULL) {
                         return WALK_NOMEM;
                     }
                 }
@@ -77,85 +84,17 @@ static WalkExitCode recurse(char *target, regex_t *regex, FileMatch *result) {
     return exit_code;
 }
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, FileMatch **result) {
+WalkExitCode WalkRecursive(char *dname, char *pattern, ListEntry **result) {
 	regex_t regex;
 	WalkExitCode exit_code;
-
-	FileMatch *matches = FileMatchCreate();
-	*result = matches;
 
 	if (regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB | REG_NEWLINE)) {
 	    return WALK_BADPATTERN;
 	}
-
-	exit_code = recurse(dname, &regex, matches);
+    
+    ListDestroy(*result);
+	exit_code = recurse(dname, &regex, result);
 	regfree(&regex);
 
 	return exit_code;
-}
-
-void FileMatchFinish(FileMatch * matches) {
-    if(matches->next != NULL) {
-        free(matches->next);
-    }
-
-    if(matches->filename != NULL) {
-        free(matches->filename);
-    }
-
-    matches = matches->prev;
-    free(matches->next);
-    matches->next = NULL;
-}
-
-FileMatch * FileMatchAdd(FileMatch * matches, char *name, int length) {
-    matches->filename = malloc(length + 1);
-    matches->next = calloc(1,sizeof(FileMatch));
-
-    if((matches->filename == NULL) || (matches->next == NULL)) {
-        return NULL;
-    }
-
-    strncpy(matches->filename, name, length);
-    matches->filename[length] = '\x00';
-    matches->next->prev = matches;
-
-    return matches->next;
-}
-
-void FileMatchRewind(FileMatch **match_list) {
-    while((*match_list)->prev != NULL) {
-        *match_list = (*match_list)->prev;
-    }
-}
-
-FileMatch * FileMatchIterate(FileMatch **match_list) {
-    FileMatch *result = *match_list;
-
-    if((*match_list)->next != NULL)
-        *match_list = (*match_list)->next;
-    return result;
-}
-
-void FileMatchDestroy(FileMatch *match_list) {
-    FileMatch *temp;
-    FileMatchRewind(&match_list);
-
-    while(match_list != NULL) {
-        temp = match_list->next;
-
-        if(match_list->filename != NULL) {
-            free(match_list->filename);
-        }
-
-        free(match_list);
-        match_list = temp;
-    }
-}
-
-FileMatch * FileMatchCreate() {
-    FileMatch * result;
-    result = calloc(1,sizeof(FileMatch));
-
-    return result;
 }

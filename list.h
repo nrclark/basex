@@ -14,11 +14,11 @@ typedef struct ListEntry {
     struct ListEntry *prev;
 } ListEntry;
 
-ListEntry* list_create();
-ListEntry * list_rewind(ListEntry *target);
-ListEntry * list_delete(ListEntry *target);
-ListEntry * list_add_before(ListEntry *target, void *data);
-ListEntry * list_add_after(ListEntry *target, void *data);
-void list_destroy(ListEntry *target);
+ListEntry* ListCreate();
+ListEntry * ListRewind(ListEntry *target);
+ListEntry * ListDelete(ListEntry *target);
+ListEntry * ListAddBefore(ListEntry *target, void *data);
+ListEntry * ListAddAfter(ListEntry *target, void *data);
+void ListDestroy(ListEntry *target);
 
 #endif /* LIST_H_ */
