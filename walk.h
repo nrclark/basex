@@ -8,6 +8,8 @@
 #ifndef WALK_H_
 #define WALK_H_
 
+#include "list.h"
+
 typedef enum {
     WALK_OK = 0,
     WALK_BADPATTERN = 1,

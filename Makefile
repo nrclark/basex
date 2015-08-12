@@ -1,18 +1,18 @@
-SOURCES := list_main.c list.c list.h
+SOURCES := basex.c walk.c walk.h list.c list.h
 
 default: test
 
-test: listx
+test: basex
 	./$^ . ".*[.]c$$"
 
-listx: $(SOURCES)
+basex: $(SOURCES)
 	gcc -O2 -Wall -Wextra -Wno-format $(filter %.c,$^) -o $@
 	
-listx_valgrind: $(SOURCES)
+basex_valgrind: $(SOURCES)
 	gcc -O0 -g3 -Wall -Wextra -Wno-format $(filter %.c,$^) -o $@
 	
-memcheck: listx_valgrind
+memcheck: basex_valgrind
 	valgrind --leak-check=yes ./$^ . ".*[.]c$$"
 
 clean::
-	rm -f listx_valgrind listx
+	rm -f basex_valgrind basex

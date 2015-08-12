@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "list.h"
 #include "walk.h"
 
 static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
@@ -84,17 +85,22 @@ static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
     return exit_code;
 }
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, ListEntry **result) {
+WalkExitCode WalkRecursive(char *dname, char *pattern, LinkedList *result) {
 	regex_t regex;
 	WalkExitCode exit_code;
 
 	if (regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB | REG_NEWLINE)) {
 	    return WALK_BADPATTERN;
 	}
-    
-    ListDestroy(*result);
-	exit_code = recurse(dname, &regex, result);
-	regfree(&regex);
+    ListEntry *top;
+    *result = ListRewind(*result);
+    top = *result;
+    //ListDestroy(*result);
+	
+    //exit_code = recurse(dname, &regex, result);
+    regfree(&regex);
+	
+    *result = top;
 
 	return exit_code;
 }
