@@ -15,7 +15,6 @@ typedef struct Node {
 
 typedef Node * Stack;
 
-int StackInit(Stack *target);
 int StackPush(Stack *target, void *data);
 void *StackPop(Stack *target);
 

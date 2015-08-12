@@ -1,4 +1,4 @@
-SOURCES := basex.c walk.c walk.h list.c list.h
+SOURCES := basex.c walk.c walk.h stack.c stack.h
 
 default: test
 

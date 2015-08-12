@@ -8,7 +8,7 @@
 #ifndef WALK_H_
 #define WALK_H_
 
-#include "list.h"
+#include "stack.h"
 
 typedef enum {
     WALK_OK = 0,
@@ -19,6 +19,6 @@ typedef enum {
     WALK_INVALID = 5
 } WalkExitCode;
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, ListEntry **result);
+WalkExitCode WalkRecursive(char *dname, char *pattern, Stack *result);
 
 #endif /* WALK_H_ */

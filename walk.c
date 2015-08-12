@@ -6,10 +6,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "list.h"
+#include "stack.h"
 #include "walk.h"
 
-static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
+static WalkExitCode recurse(char *target, regex_t *regex, Stack *result) {
     int target_length;
     int dname_length;
     int full_length;
@@ -56,7 +56,7 @@ static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
         buffer[full_length] = '\x00';
 
         if (stat(buffer, &file_stat) == -1) {
-            fprintf(stderr, "Can't stat %s", buffer);
+            fprintf(stderr, "Can't stat %s\n", buffer);
             exit_code = WALK_BADIO;
             entry = readdir(dir);
             continue;
@@ -69,12 +69,14 @@ static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
                 if (regexec(regex, dname, 0, 0, 0) == 0) {
                     output = malloc(full_length + 1);
                     if(output == NULL) {
+                        closedir(dir);
                         return WALK_NOMEM;
                     }
                     strncpy(output, buffer, full_length);
                     output[full_length] = 0x00;
-                    *result = ListAddAfter(*result, output);
+                    StackPush(result, output); 
                     if(*result == NULL) {
+                        closedir(dir);
                         return WALK_NOMEM;
                     }
                 }
@@ -82,25 +84,19 @@ static WalkExitCode recurse(char *target, regex_t *regex, ListEntry **result) {
         }
         entry = readdir(dir);
     }
+    closedir(dir);
     return exit_code;
 }
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, LinkedList *result) {
+WalkExitCode WalkRecursive(char *dname, char *pattern, Stack *result) {
 	regex_t regex;
 	WalkExitCode exit_code;
 
 	if (regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB | REG_NEWLINE)) {
 	    return WALK_BADPATTERN;
 	}
-    ListEntry *top;
-    *result = ListRewind(*result);
-    top = *result;
-    //ListDestroy(*result);
 	
-    //exit_code = recurse(dname, &regex, result);
+    exit_code = recurse(dname, &regex, result);
     regfree(&regex);
-	
-    *result = top;
-
 	return exit_code;
 }

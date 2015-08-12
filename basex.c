@@ -9,11 +9,12 @@
 #include <err.h>
 
 #include "walk.h"
-#include "list.h"
+#include "stack.h"
 
 int main(int argc, char** argv) {
     WalkExitCode exit_code = WALK_OK;
-    ListEntry *result = NULL;
+    Stack result = NULL;
+    char *match;
 
     exit_code = WalkRecursive(argv[1], argv[2], &result);
 
@@ -21,19 +22,10 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Returned %d\n", exit_code);
     }
 
-    while (result->next != NULL) {
-        if(result->data != NULL)
-            printf("%s", (char *)(result->data));
-
-        printf(", %08X, %08X, %08X\n", result->prev, result, result->next);
-        result = result->next;
+    while(result != NULL) {
+        match = (char *)StackPop(&result);
+        fprintf(stdout, "Found: %s\n", match);
+        free(match);
     }
-    
-    if(result->data != NULL)
-        printf("%s", (char *)(result->data));
-
-    printf(", %08X, %08X, %08X\n", result->prev, result, result->next);
-    return 0;
-    ListDestroy(result);
-	return 0;
+	return exit_code;
 }

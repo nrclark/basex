@@ -29,13 +29,3 @@ void * StackPop(Stack *target) {
     *target = next;
     return data;
 }
-
-int StackInit(Stack *target) {
-    *target = calloc(1,sizeof(Node));
-
-    if(*target == NULL) {
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
