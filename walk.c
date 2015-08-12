@@ -9,7 +9,8 @@
 #include "stack.h"
 #include "walk.h"
 
-static WalkExitCode recurse(char *target, regex_t *regex, Stack *result) {
+static WalkExitCode recurse(char *target, regex_t *regex, unsigned int *count,
+                            Stack *result) {
     int target_length;
     int dname_length;
     int full_length;
@@ -63,7 +64,7 @@ static WalkExitCode recurse(char *target, regex_t *regex, Stack *result) {
         }
 
         if (S_ISDIR(file_stat.st_mode)) {
-            exit_code = recurse(buffer, regex, result);
+            exit_code = recurse(buffer, regex, count, result);
         } else {
             if (S_ISREG(file_stat.st_mode)) {
                 if (regexec(regex, dname, 0, 0, 0) == 0) {
@@ -74,7 +75,8 @@ static WalkExitCode recurse(char *target, regex_t *regex, Stack *result) {
                     }
                     strncpy(output, buffer, full_length);
                     output[full_length] = 0x00;
-                    StackPush(result, output); 
+                    StackPush(result, output);
+                    (*count)++;
                     if(*result == NULL) {
                         closedir(dir);
                         return WALK_NOMEM;
@@ -88,15 +90,16 @@ static WalkExitCode recurse(char *target, regex_t *regex, Stack *result) {
     return exit_code;
 }
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, Stack *result) {
+WalkExitCode WalkRecursive(char *dname, char *pattern, unsigned int *count,
+                           Stack *result) {
 	regex_t regex;
 	WalkExitCode exit_code;
 
 	if (regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB | REG_NEWLINE)) {
 	    return WALK_BADPATTERN;
-	}
-	
-    exit_code = recurse(dname, &regex, result);
+	}	
+    
+    exit_code = recurse(dname, &regex, count, result);
     regfree(&regex);
 	return exit_code;
 }

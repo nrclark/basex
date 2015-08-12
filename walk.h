@@ -19,6 +19,7 @@ typedef enum {
     WALK_INVALID = 5
 } WalkExitCode;
 
-WalkExitCode WalkRecursive(char *dname, char *pattern, Stack *result);
+WalkExitCode WalkRecursive(char *dname, char *pattern, unsigned int *count,
+                           Stack *result);
 
 #endif /* WALK_H_ */
